@@ -1,0 +1,15 @@
+main: ${PACKAGE}.${NAME}
+name: ${NAME}
+version: "${VERSION}"
+api-version: "26.1.2"
+author: AUTHOR
+description: DESCRIPTION
+permissions:
+  example.use:
+    description: Allows use of the /example command
+    default: true
+  example.*:
+    description: Grants all other permissions
+    default: false
+    children:
+      example.use: true

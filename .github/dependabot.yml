@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps):"
+    target-branch: "main"
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      # Remove when dependabot/dependabot-core#16055 is fixed.
+      exclude:
+        - "com.github.CrimsonWarpedcraft:cw-commons"
+    commit-message:
+      prefix: "chore(deps):"
+    target-branch: "main"
