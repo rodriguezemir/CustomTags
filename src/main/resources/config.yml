@@ -1,13 +1,28 @@
-# Response message for /example ping.
-# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
-pong-message: "Pong!"
-
-# Response message for /example greet <player>.
-# Use {player} as a placeholder for the target player's name.
-# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
-greet-message: "Hello, {player}!"
-
-# Response message for /example creepersKilled.
-# Use {count} as a placeholder for the sender's creeper-kill count.
-# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
-creepers-killed-message: "You have killed {count} creeper(s)!"
+display-tags:
+  welcome:
+    lines:
+      - "<gold><bold>CustomTags"
+      - "<gray>Configurable display text"
+    display:
+      billboard: CENTER
+      view-range: 32.0
+      shadow-radius: 0.0
+      shadow-strength: 1.0
+      width: 1.0
+      height: 1.0
+      interpolation-duration: 0
+      interpolation-delay: 0
+      teleport-duration: 0
+      glowing: false
+      glow-color: "#FFD700"
+      brightness:
+        block: 15
+        sky: 15
+    text:
+      line-width: 200
+      background-color: "#00000000"
+      text-opacity: 255
+      default-background: false
+      shadowed: true
+      see-through: false
+      alignment: CENTER

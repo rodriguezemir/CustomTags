@@ -1,36 +1,30 @@
-This repository is a **PaperMC/Spigot Minecraft plugin template**. Users fork or copy it, then replace the example scaffolding with their own plugin.
+# Repository Instructions
 
-## Architecture
+## Project
 
-**Entry point**: `ExamplePlugin extends JavaPlugin`. Bukkit/Paper calls `onEnable()` and `onDisable()` during the plugin lifecycle. In `plugin.yml`, `${PACKAGE}.${NAME}` identifies the main class. The `processResources` task fills these placeholders at build time from `group` in `build.gradle.kts` and `rootProject.name` in `settings.gradle.kts`.
+- This is a PaperMC/Spigot plugin built from the root Gradle project `Main`.
+- The current entrypoint is `site.zvolcan.customtags.Main` under `src/main/java`; `src/main/resources/plugin.yml` points to it explicitly.
+- `plugin.yml` gets `${NAME}` and `${VERSION}` from `processResources`; `${PACKAGE}.${NAME}` is not the current main-class convention.
+- The build uses Java 25, Paper API `26.2.build.121-stable`, and the Gradle wrapper (Gradle 9.7.1).
 
-**JAR packaging**: The standard `jar` task is disabled, and `shadowJar` is the sole output. It shades CommandAPI and relocates it to `<group>.commandapi`. CommandAPI is excluded from `minimize()` because it loads classes through reflection. `assemble` depends on `shadowJar`.
+## Commands
 
-**cw-commons dependency**: [cw-commons](https://github.com/CrimsonWarpedcraft/cw-commons) provides `Command`/`BaseCommand` for command registration, `Config`/`BukkitConfigManagerBuilder` for YAML loading and Jakarta validation, and `BukkitDataStoreBuilder`/`Repository`/`PlayerDataManager` for persistent player data. These classes are not defined locally. The project consumes cw-commons from JitPack as `com.github.CrimsonWarpedcraft:cw-commons`. `build.gradle.kts` pins a tagged release, such as `v0.3.0`, instead of the unstable `main-SNAPSHOT`. Update that tag deliberately.
+- `./gradlew build` runs checks and tests; Checkstyle has `maxWarnings = 0` and SpotBugs is part of the build.
+- `./gradlew test` runs unit tests; focus one class with `./gradlew test --tests "fully.qualified.TestClass"` or one method with `--tests "fully.qualified.TestClass.method"`.
+- `./gradlew integrationTest` runs the separate integration-test suite.
+- `./gradlew clean build` is the full clean verification when changing build, resources, or plugin identity.
+- `./gradlew runServer` runs the configured Paper `26.1.2` test server.
+- `./gradlew -Pver="vX.Y.Z" release` builds the release JAR. Stable tags produce `build/libs/Main.jar`; `vX.Y.Z-RC-N` produces a snapshot version, while no `-Pver` produces a UTC timestamped snapshot.
 
-Jackson and Hibernate Validator remain direct dependencies because `PluginConfig` uses their `@JsonProperty` and `@NotBlank` annotations. cw-commons exposes these libraries as transitive, unbundled `api` dependencies so each consumer can shade and relocate its own copy without classloader conflicts. The direct declarations are redundant for dependency resolution, but they prevent this project from relying on another project's transitive exposure choices.
+## Build Rules
 
-**Command declaration**: CommandAPI registers commands programmatically in `onEnable()` (see `ExampleCommand`/`BaseCommand`). Adding a matching entry under `commands:` in `plugin.yml` makes Bukkit register the same command a second time, which CommandAPI flags at startup with a "Plugin command ... is registered by Bukkit" warning. `permissions:` entries are unaffected and still required.
+- `shadowJar` is the distributable JAR; the plain `jar` task is disabled and `assemble` depends on `shadowJar`.
+- Dependencies are relocated in `shadowJar`; when adding a dependency, review both `relocate(...)` and `minimize { exclude(...) }` because reflection/SPI-only libraries can be stripped silently.
+- If adding CommandAPI commands, register them programmatically and do not duplicate them under `commands:` in `plugin.yml`; declare required permissions there instead.
 
-**Versioning logic** (in `build.gradle.kts`):
+## Workflow
 
-- No `-Pver` supplied -> `yyMMdd-HHmm-SNAPSHOT`
-- `-Pver=vX.Y.Z-RC-N` -> `X.Y.Z-RC-N-SNAPSHOT`
-- `-Pver=vX.Y.Z` -> `X.Y.Z` (stable release)
-
-**CI workflows** (`.github/workflows/`):
-
-- `pr.yml`: builds and tests on Ubuntu + Windows for PRs and merge queue
-- `main.yml`: builds, tests, and uploads a snapshot artifact on push to `main`
-- `tag.yml` / `release.yml`: handle tagged releases and Discord notifications
-
-**Test suites**: `test` contains isolated unit tests and may mock external boundaries.
-`integrationTest` exercises the pinned cw-commons dependency directly, including configuration
-loading and SQLite persistence. Integration tests use JUnit temporary directories for generated
-files. Run this suite separately with `./gradlew integrationTest`.
-
-## Agent instructions
-
-1. Canonical skills live in `.agents/skills/`. The `.claude/skills/` directory is a generated mirror.
-2. `CLAUDE.md` is a generated copy of this `AGENTS.md`.
-3. Do not edit or create `CLAUDE.md` or files under `.claude/skills/`. Claude hooks configured in `.claude/settings.json` synchronize these mirrors on `SessionStart` and `PostToolUse`.
+- CI runs `./gradlew build --stacktrace` on Java 25 for Ubuntu and Windows, plus `./gradlew integrationTest --info` on Ubuntu.
+- Follow `CONTRIBUTING.md`: branch from `main`, use Conventional Commit messages, and keep changes focused.
+- `.agents/skills/` is canonical. `CLAUDE.md` and `.claude/skills/` are generated/ignored mirrors; do not edit or create them directly.
+- If an important plugin requirement is not specified by the repository, ask the user instead of guessing.
