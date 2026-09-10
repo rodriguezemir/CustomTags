@@ -36,10 +36,25 @@ repositories {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
+
+    maven {
+        name = "placeholderapi"
+        url = uri("https://repo.helpch.at/releases")
+    }
+
+    maven {
+        name = "jitpack"
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
     paperweight.paperDevBundle("26.2.build.121-stable")
+
+    compileOnly("me.clip:placeholderapi:2.12.3")
+    compileOnly("io.github.miniplaceholders:miniplaceholders-api:3.2.0")
+    compileOnly("com.github.NEZNAMY:TAB-API:6.1.2")
+    compileOnly("com.github.spotbugs:spotbugs-annotations:4.10.4")
 
     spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0")
 
@@ -50,6 +65,11 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    classpath = classpath.filter { it.name != "mappedServerJar.jar" }
+}
+
+configurations.testRuntimeClasspath {
+    resolutionStrategy.force("io.papermc.paper:paper-api:26.2.build.111-stable")
 }
 
 tasks.runServer {
