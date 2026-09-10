@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Display;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 
 /** A configurable text display definition. */
@@ -36,9 +37,6 @@ public final class DisplayTag {
 
   private DisplayTag(ConfigurationSection section) {
     ConfigurationSection display = section.getConfigurationSection("display");
-    ConfigurationSection text = section.getConfigurationSection("text");
-    ConfigurationSection brightness = display == null
-        ? null : display.getConfigurationSection("brightness");
 
     lines = List.copyOf(section.getStringList("lines"));
     billboard = enumValue(display, "billboard", Display.Billboard.CENTER, Display.Billboard.class);
@@ -52,8 +50,11 @@ public final class DisplayTag {
     teleportDuration = intValue(display, "teleport-duration", 0);
     glowing = booleanValue(display, "glowing", false);
     glowColor = colorValue(display, "glow-color", null);
+    ConfigurationSection brightness = display == null
+        ? null : display.getConfigurationSection("brightness");
     blockLight = brightness == null ? null : brightness.getInt("block", 15);
     skyLight = brightness == null ? null : brightness.getInt("sky", 15);
+    ConfigurationSection text = section.getConfigurationSection("text");
     lineWidth = intValue(text, "line-width", 200);
     backgroundColor = colorValue(text, "background-color", null);
     textOpacity = opacityValue(text, "text-opacity", 255);
@@ -81,7 +82,17 @@ public final class DisplayTag {
    */
   public void applyTo(TextDisplay display) {
     Component text = MiniMessage.miniMessage().deserialize(String.join("\n", lines));
-    display.setText(text);
+    applyTo(display, text);
+  }
+
+  /**
+   * Applies this definition to a text display entity with the supplied text.
+   *
+   * @param display text display entity to configure
+   * @param text text to render
+   */
+  public void applyTo(TextDisplay display, Component text) {
+    display.text(text);
     display.setBillboard(billboard);
     display.setViewRange(viewRange);
     display.setShadowRadius(shadowRadius);
@@ -105,107 +116,196 @@ public final class DisplayTag {
     display.setAlignment(alignment);
   }
 
-  /** @return configured lines */
+  /** Applies this definition after rendering its text for a player. */
+  public void applyTo(TextDisplay display, Player player, DisplayTagRenderer renderer) {
+    applyTo(display, renderer.render(this, player));
+  }
+
+  /**
+   * Returns the configured lines.
+   *
+   * @return configured lines
+   */
   public List<String> getLines() {
     return lines;
   }
 
-  /** @return display billboard mode */
+  /**
+   * Returns the display billboard mode.
+   *
+   * @return display billboard mode
+   */
   public Display.Billboard getBillboard() {
     return billboard;
   }
 
-  /** @return display view range */
+  /**
+   * Returns the display view range.
+   *
+   * @return display view range
+   */
   public float getViewRange() {
     return viewRange;
   }
 
-  /** @return display shadow radius */
+  /**
+   * Returns the display shadow radius.
+   *
+   * @return display shadow radius
+   */
   public float getShadowRadius() {
     return shadowRadius;
   }
 
-  /** @return display shadow strength */
+  /**
+   * Returns the display shadow strength.
+   *
+   * @return display shadow strength
+   */
   public float getShadowStrength() {
     return shadowStrength;
   }
 
-  /** @return display width */
+  /**
+   * Returns the display width.
+   *
+   * @return display width
+   */
   public float getDisplayWidth() {
     return displayWidth;
   }
 
-  /** @return display height */
+  /**
+   * Returns the display height.
+   *
+   * @return display height
+   */
   public float getDisplayHeight() {
     return displayHeight;
   }
 
-  /** @return display interpolation duration */
+  /**
+   * Returns the interpolation duration.
+   *
+   * @return display interpolation duration
+   */
   public int getInterpolationDuration() {
     return interpolationDuration;
   }
 
-  /** @return display interpolation delay */
+  /**
+   * Returns the interpolation delay.
+   *
+   * @return display interpolation delay
+   */
   public int getInterpolationDelay() {
     return interpolationDelay;
   }
 
-  /** @return display teleport duration */
+  /**
+   * Returns the teleport duration.
+   *
+   * @return display teleport duration
+   */
   public int getTeleportDuration() {
     return teleportDuration;
   }
 
-  /** @return whether the display glows */
+  /**
+   * Returns whether the display glows.
+   *
+   * @return whether the display glows
+   */
   public boolean isGlowing() {
     return glowing;
   }
 
-  /** @return configured glow color */
+  /**
+   * Returns the configured glow color.
+   *
+   * @return configured glow color
+   */
   public Color getGlowColor() {
     return glowColor;
   }
 
-  /** @return block light override, or null when unset */
+  /**
+   * Returns the block light override.
+   *
+   * @return block light override, or null when unset
+   */
   public Integer getBlockLight() {
     return blockLight;
   }
 
-  /** @return sky light override, or null when unset */
+  /**
+   * Returns the sky light override.
+   *
+   * @return sky light override, or null when unset
+   */
   public Integer getSkyLight() {
     return skyLight;
   }
 
-  /** @return maximum line width */
+  /**
+   * Returns the maximum line width.
+   *
+   * @return maximum line width
+   */
   public int getLineWidth() {
     return lineWidth;
   }
 
-  /** @return text background color */
+  /**
+   * Returns the text background color.
+   *
+   * @return text background color
+   */
   public Color getBackgroundColor() {
     return backgroundColor;
   }
 
-  /** @return text opacity */
+  /**
+   * Returns the text opacity.
+   *
+   * @return text opacity
+   */
   public byte getTextOpacity() {
     return textOpacity;
   }
 
-  /** @return whether the default text background is enabled */
+  /**
+   * Returns whether the default text background is enabled.
+   *
+   * @return whether the default text background is enabled
+   */
   public boolean isDefaultBackground() {
     return defaultBackground;
   }
 
-  /** @return whether the text has a shadow */
+  /**
+   * Returns whether the text has a shadow.
+   *
+   * @return whether the text has a shadow
+   */
   public boolean isShadowed() {
     return shadowed;
   }
 
-  /** @return whether the text renders through blocks */
+  /**
+   * Returns whether the text renders through blocks.
+   *
+   * @return whether the text renders through blocks
+   */
   public boolean isSeeThrough() {
     return seeThrough;
   }
 
-  /** @return text alignment */
+  /**
+   * Returns the text alignment.
+   *
+   * @return text alignment
+   */
   public TextDisplay.TextAlignment getAlignment() {
     return alignment;
   }
