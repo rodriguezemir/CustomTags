@@ -4,3 +4,4 @@ version: "${VERSION}"
 api-version: "26.1.2"
 author: AUTHOR
 description: DESCRIPTION
+softdepend: [PlaceholderAPI, MiniPlaceholders, TAB]

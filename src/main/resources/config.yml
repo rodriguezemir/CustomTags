@@ -1,8 +1,9 @@
+integrations:
+  tab:
+    hide-vanilla-nametags: true
+
 display-tags:
-  welcome:
-    lines:
-      - "<gold><bold>CustomTags"
-      - "<gray>Configurable display text"
+  nametag:
     display:
       billboard: CENTER
       view-range: 32.0

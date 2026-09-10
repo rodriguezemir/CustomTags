@@ -1,5 +1,6 @@
 package site.zvolcan.customtags;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.bukkit.configuration.ConfigurationSection;
@@ -13,27 +14,49 @@ public final class Main extends JavaPlugin {
 
   private final PlayerDataManager playerDataManager = new PlayerDataManager();
   private Map<String, DisplayTag> displayTags = Map.of();
+  private NametagManager nametagManager;
+  private TabNametagHider tabNametagHider;
 
   @Override
   public void onEnable() {
     saveDefaultConfig();
-    getServer().getPluginManager().registerEvents(playerDataManager, this);
     displayTags = loadDisplayTags();
+    getServer().getPluginManager().registerEvents(playerDataManager, this);
+
+    if (getConfig().getBoolean("integrations.tab.hide-vanilla-nametags", true)
+        && getServer().getPluginManager().isPluginEnabled("TAB")) {
+      tabNametagHider = TabNametagHider.create(this);
+    }
+
+    DisplayTag nametagStyle = displayTags.get("nametag");
+    if (nametagStyle != null) {
+      DisplayTagRenderer renderer = DisplayTagRenderer.create(this);
+      nametagManager = new NametagManager(this, nametagStyle, renderer);
+      getServer().getPluginManager().registerEvents(nametagManager, this);
+      nametagManager.synchronizeOnlinePlayers();
+    }
   }
 
   @Override
   public void onDisable() {
+    if (tabNametagHider != null) {
+      tabNametagHider.close();
+    }
+    if (nametagManager != null) {
+      nametagManager.clear();
+    }
     playerDataManager.clear();
   }
 
   /** Returns the manager for connected player data. */
+  @SuppressFBWarnings("EI_EXPOSE_REP")
   public PlayerDataManager getPlayerDataManager() {
     return playerDataManager;
   }
 
   /** Returns the configured display tags by name. */
   public Map<String, DisplayTag> getDisplayTags() {
-    return displayTags;
+    return Map.copyOf(displayTags);
   }
 
   private Map<String, DisplayTag> loadDisplayTags() {
