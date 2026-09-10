@@ -8,6 +8,7 @@ public final class PlayerData {
 
   private final UUID uniqueId;
 
+  /** Creates runtime data for the supplied player UUID. */
   public PlayerData(UUID uniqueId) {
     this.uniqueId = Objects.requireNonNull(uniqueId, "uniqueId");
   }
