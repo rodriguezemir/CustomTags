@@ -12,7 +12,7 @@ public final class DisplayTagRenderer {
   private final PlaceholderApiTextRenderer placeholderApi;
   private final MiniPlaceholdersTextRenderer miniPlaceholders;
 
-  private DisplayTagRenderer(
+  DisplayTagRenderer(
       PlaceholderApiTextRenderer placeholderApi,
       MiniPlaceholdersTextRenderer miniPlaceholders) {
     this.placeholderApi = placeholderApi;
@@ -32,19 +32,34 @@ public final class DisplayTagRenderer {
 
   /** Renders a display tag for a specific player. */
   public Component render(DisplayTag tag, Player player) {
-    List<String> renderedLines = tag.getLines();
-    if (renderedLines.isEmpty()) {
-      renderedLines = List.of(player.getName());
+    List<Component> lines = renderLines(tag, player);
+    Component result = Component.empty();
+    for (int index = 0; index < lines.size(); index++) {
+      if (index > 0) {
+        result = result.append(Component.newline());
+      }
+      result = result.append(lines.get(index));
     }
+    return result;
+  }
+
+  /** Renders stable, independently addressable lines for a specific player. */
+  public List<Component> renderLines(DisplayTag tag, Player player) {
+    List<String> configuredLines = tag.getLines();
+    List<String> renderedLines = configuredLines.isEmpty()
+        ? List.of(player.getName()) : configuredLines;
     if (placeholderApi != null) {
       renderedLines = renderedLines.stream()
           .map(line -> placeholderApi.render(player, line))
           .toList();
     }
-    String text = String.join("\n", renderedLines);
     if (miniPlaceholders != null) {
-      return miniPlaceholders.render(player, text);
+      return renderedLines.stream()
+          .map(line -> miniPlaceholders.render(player, line))
+          .toList();
     }
-    return MiniMessage.miniMessage().deserialize(text);
+    return renderedLines.stream()
+        .map(line -> MiniMessage.miniMessage().deserialize(line))
+        .toList();
   }
 }
