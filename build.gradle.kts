@@ -27,6 +27,17 @@ version = (if (!hasProperty("ver")) {
     if (ver.startsWith("v") && !ver.lowercase().contains("-rc-")) base else "$base-SNAPSHOT"
 }).uppercase()
 
+val paperTarget = providers.gradleProperty("paperTarget").orElse("26.2")
+val paperBundle = when (paperTarget.get()) {
+    "26.1.2" -> "26.1.2.build.74-stable"
+    "26.2" -> "26.2.build.121-stable"
+    else -> throw GradleException("Unsupported paperTarget: ${paperTarget.get()}")
+}
+
+sourceSets.main {
+    java.srcDir("src/main/java-${paperTarget.get()}")
+}
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 repositories {
@@ -49,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("26.2.build.121-stable")
+    paperweight.paperDevBundle(paperBundle)
 
     compileOnly("me.clip:placeholderapi:2.12.3")
     compileOnly("io.github.miniplaceholders:miniplaceholders-api:3.2.0")
@@ -73,7 +84,7 @@ configurations.testRuntimeClasspath {
 }
 
 tasks.runServer {
-    minecraftVersion("26.2")
+    minecraftVersion(paperTarget.get())
 }
 
 tasks.processResources {
