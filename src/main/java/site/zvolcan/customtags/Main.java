@@ -15,6 +15,7 @@ public final class Main extends JavaPlugin {
   private final PlayerDataManager playerDataManager = new PlayerDataManager();
   private Map<String, DisplayTag> displayTags = Map.of();
   private NametagManager nametagManager;
+  private DisplayEntityTransportSelector displayEntityTransport;
   private TabNametagHider tabNametagHider;
 
   @Override
@@ -30,8 +31,9 @@ public final class Main extends JavaPlugin {
 
     DisplayTag nametagStyle = displayTags.get("nametag");
     if (nametagStyle != null) {
+      displayEntityTransport = DisplayEntityTransportSelector.create(this);
       DisplayTagRenderer renderer = DisplayTagRenderer.create(this);
-      nametagManager = new NametagManager(this, nametagStyle, renderer);
+      nametagManager = new NametagManager(this, nametagStyle, renderer, displayEntityTransport);
       getServer().getPluginManager().registerEvents(nametagManager, this);
       nametagManager.synchronizeOnlinePlayers();
     }
@@ -44,6 +46,9 @@ public final class Main extends JavaPlugin {
     }
     if (nametagManager != null) {
       nametagManager.clear();
+    }
+    if (displayEntityTransport != null) {
+      displayEntityTransport.close();
     }
     playerDataManager.clear();
   }
