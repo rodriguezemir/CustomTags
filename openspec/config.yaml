@@ -1,0 +1,75 @@
+schema: spec-driven
+project: customtags
+current_change: client-side-display-entities
+artifact_store: openspec
+execution_mode: automatic
+delivery_strategy: single-pr
+review_budget:
+  policy: fixed
+  max_changed_lines: 400
+strict_tdd: true
+
+context: |
+  Stack: Single-module Java 25 PaperMC plugin built with Gradle 9.7.1 and Paperweight.
+  Platform: Paper API 26.2.build.121-stable; the plugin targets multiple server versions through packet-based rendering.
+  Architecture: JavaPlugin entrypoint with DisplayTag configuration, NametagManager lifecycle handling, and optional integrations.
+  Current behavior: Nametags are server-spawned Bukkit TextDisplay entities and currently combine configured lines into one display.
+  Conventions: English technical artifacts, Checkstyle with zero warnings, SpotBugs in the build, focused Conventional Commits.
+  Change scope: client-side display-entity packets for Minecraft 26.2, 26.1.2, 26.1, and 1.21.11, with one entity per line.
+
+projects:
+  - path: "."
+    name: Main
+    stack: "Java 25 / Gradle 9.7.1 / Paperweight / Paper API 26.2"
+    commands:
+      test: "./gradlew test"
+      build: "./gradlew build"
+      integration_test: "./gradlew integrationTest"
+      coverage: null
+    test_layers:
+      unit: "JUnit 6.1.3 with MockBukkit 4.116.1 under src/test"
+      integration: "No src/integrationTest directory or integration-test task definition detected; command is documented and used by CI"
+      e2e: null
+    quality:
+      linter: "./gradlew checkstyleMain checkstyleTest"
+      static_analysis: "./gradlew spotbugsMain spotbugsTest"
+      type_checker: null
+      formatter: null
+
+testing: |
+  Strict TDD Mode: enabled.
+  Workspace test command: ./gradlew build (explicit root command covering the only discovered project).
+  Unit tests: available through ./gradlew test using JUnit 6.1.3 and MockBukkit 4.116.1.
+  Integration tests: ./gradlew integrationTest is documented and invoked by CI, but no integration-test source set or task definition was detected during initialization.
+  E2E tests: not detected.
+  Coverage: no coverage tool or command detected.
+  Quality: Checkstyle (zero warnings) and SpotBugs are part of the Gradle build; no type checker or formatter command detected.
+
+rules:
+  proposal:
+    - State the packet compatibility and version-support strategy.
+    - Include rollback and fallback behavior for unsupported clients.
+  specs:
+    - Use Given/When/Then scenarios.
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY).
+    - Specify one client-side display entity per nametag line and the 1.8/0.3 block vertical placement.
+  design:
+    - Document packet lifecycle, viewer visibility, cleanup, and version compatibility.
+    - Include sequence diagrams for packet/entity synchronization flows.
+  tasks:
+    - Group by implementation phase and keep tasks reviewable within the fixed 400-line budget.
+  apply:
+    guidelines:
+      - Follow existing Paper plugin lifecycle and configuration patterns.
+      - Keep implementation and focused tests in the same reviewable work unit.
+    tdd: true
+    test_command: "./gradlew test"
+  verify:
+    test_command: "./gradlew test"
+    build_command: "./gradlew build"
+    integration_test_command: "./gradlew integrationTest"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive or compatibility-affecting deltas.
+
+skill_registry: .atl/skill-registry.md
