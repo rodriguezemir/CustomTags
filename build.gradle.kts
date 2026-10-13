@@ -80,7 +80,7 @@ tasks.test {
 }
 
 configurations.testRuntimeClasspath {
-    resolutionStrategy.force("io.papermc.paper:paper-api:26.2.build.111-stable")
+    resolutionStrategy.force("io.papermc.paper:paper-api:26.3.build.178-stable")
 }
 
 tasks.runServer {
