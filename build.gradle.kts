@@ -71,7 +71,7 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v26.2:4.116.1")
+    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v26.2:4.117.0")
 }
 
 tasks.test {
